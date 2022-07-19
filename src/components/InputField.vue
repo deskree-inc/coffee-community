@@ -1,13 +1,20 @@
 <template>
   <div class="input-wrapper">
     <label>{{name}}</label>
-    <input :placeholder="placeholder" :type="type">
+    <input :placeholder="placeholder" :type="type" @input="$emit('update:modelValue', $event.target.value)" v-model="input" :name="name">
   </div>
 </template>
 
 <script lang="ts">
-export default {
+import { ref } from "vue";
+import {defineComponent} from "vue";
+
+export default defineComponent({
   name: "InputField",
+  setup() {
+    const input = ref("");
+    return { input };
+  },
   props: {
     name: {
       type: String,
@@ -21,8 +28,8 @@ export default {
       type: String,
       default: "text"
     }
-  }
-}
+  },
+})
 </script>
 
 <style lang="scss" scoped>
