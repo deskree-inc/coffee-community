@@ -4,11 +4,11 @@
     </div>
     <div class="right-side">
       <div class="form">
-        <h1>Login</h1>
+        <h1>Sign Up</h1>
         <input-field name="email" placeholder="Your email"></input-field>
         <input-field name="password" placeholder="Your password" type="password"></input-field>
-        <button-primary text="Login" type="submit"></button-primary>
-        <span class="choice">Not registered yet? <router-link to="sign-up">Sign Up</router-link> instead!</span>
+        <button-primary text="Sign up" type="submit"></button-primary>
+        <span class="choice">Already a member? <router-link to="login">Login </router-link> instead!</span>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@ import InputField from "@/components/InputField.vue";
 import ButtonPrimary from "@/components/Button.vue";
 
 export default defineComponent({
-  name: 'LoginView',
+  name: 'SignUpView',
   components: {ButtonPrimary, InputField},
 });
 </script>

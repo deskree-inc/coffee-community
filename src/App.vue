@@ -17,6 +17,15 @@
     line-height: 50px;
     font-weight: 400;
   }
+
+  a {
+    display: inline-block;
+    border-bottom: 2px solid rgba(162, 95, 75, 0.2);
+    -webkit-transition: color 400ms ease, border-color 400ms ease;
+    transition: color 400ms ease, border-color 400ms ease;
+    color: #a25f4b;
+    text-decoration: none;
+  }
 }
 
 nav {

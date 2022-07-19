@@ -43,5 +43,7 @@ button {
   text-transform: uppercase;
   border: none;
   cursor: pointer;
+  margin-bottom: 20px;
+  width: fit-content;
 }
 </style>
