@@ -3,15 +3,24 @@
     <div class="left-side">
     </div>
     <div class="right-side">
+      <div class="form">
+        <h1>Login</h1>
+        <input-field name="email" placeholder="Your email"></input-field>
+        <input-field name="password" placeholder="Your password" type="password"></input-field>
+        <button-primary text="Login" type="submit"></button-primary>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import InputField from "@/components/InputField.vue";
+import ButtonPrimary from "@/components/Button.vue";
 
 export default defineComponent({
   name: 'HomeView',
+  components: {ButtonPrimary, InputField},
 });
 </script>
 
@@ -30,6 +39,20 @@ export default defineComponent({
     background-image: url('~@/assets/coffee-background.jpg');
     background-position: center;
     background-size: cover;
+  }
+  .right-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .form {
+    padding: 60px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: rgba(210, 210, 213, 0.5);
+    background-color: #fff;
+    width: 80%;
   }
 }
 </style>
