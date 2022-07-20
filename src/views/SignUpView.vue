@@ -37,17 +37,33 @@ export default defineComponent({
   methods: {
     async signUp() {
       try {
+        // Create account with email and password
         const userData = await client.post('/auth/accounts/signup', {
           email: this.email,
           password: this.password
         });
-        const userObject = await client.patch(`/rest/collections/users${userData.data.data.uid}`, {
-          name: this.fullName
+        // Update user object in the database
+        const webflowAuthor = await client.post(`/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_AUTHORS_COLLECTION_ID}/items`, {
+          fields: {
+            name: this.fullName,
+            _archived: false,
+            _draft: false,
+          }
         });
+
+        // Update user object in the database
+        const userObject = await client.patch(`/rest/collections/users/${userData.data.data.uid}`, {
+          name: this.fullName,
+          webflow_author_id: webflowAuthor.data._id,
+          roles: [],
+        });
+
+
         this.$store.commit('saveUser', {
           uid: userData.data.data.uid,
           name: userObject.data.data.name,
           email:  userData.data.data.email,
+          webflow_author_id: webflowAuthor.data._id,
           roles:  userObject.data.data.roles,
           token:  userData.data.data.idToken,
           refreshToken:  userData.data.data.refreshToken,
