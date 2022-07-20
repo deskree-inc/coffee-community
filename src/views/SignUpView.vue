@@ -37,13 +37,22 @@ export default defineComponent({
   methods: {
     async signUp() {
       try {
-        const user = await client.post('/auth/accounts/signup', {
+        const userData = await client.post('/auth/accounts/signup', {
           email: this.email,
           password: this.password
         });
-        await client.patch(`/rest/collections/users${user.data.data.uid}`, {
+        const userObject = await client.patch(`/rest/collections/users${userData.data.data.uid}`, {
           name: this.fullName
         });
+        this.$store.commit('saveUser', {
+          uid: userData.data.data.uid,
+          name: userObject.data.data.name,
+          email:  userData.data.data.email,
+          roles:  userObject.data.data.roles,
+          token:  userData.data.data.idToken,
+          refreshToken:  userData.data.data.refreshToken,
+        });
+        this.$router.push("/dashboard");
       } catch (e: any) {
         console.error(e)
         if (checkForErrors(e.response)) {

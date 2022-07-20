@@ -35,10 +35,20 @@ export default defineComponent({
   methods: {
     async login() {
       try {
-        await client.post('/auth/accounts/sign-in/email', {
+        const userData = await client.post('/auth/accounts/sign-in/email', {
           email: this.email,
           password: this.password
         });
+        const userObject = await client.get(`/rest/collections/users/${userData.data.data.uid}`);
+        this.$store.commit('saveUser', {
+          uid: userData.data.data.uid,
+          name: userObject.data.data.name,
+          email:  userData.data.data.email,
+          roles:  userObject.data.data.roles,
+          token:  userData.data.data.idToken,
+          refreshToken:  userData.data.data.refreshToken,
+        });
+        this.$router.push("/dashboard");
       } catch (e: any) {
         console.error(e)
         if (checkForErrors(e.response)) {
