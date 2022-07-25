@@ -31,7 +31,7 @@
         </div>
         <div class="product-info">
           <h2>{{ recipe.name }}</h2>
-          <span>{{ user.name }}</span>
+          <span v-if="recipe.author_name">{{ recipe.author_name }}</span>
         </div>
       </div>
     </div>
@@ -72,7 +72,8 @@ export default defineComponent({
         text: "",
         show: false
       },
-      collectionUrl: `/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_RECIPES_COLLECTION_ID}/items`,
+      recipesUrl: `/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_RECIPES_COLLECTION_ID}/items`,
+      authorsUrl: `/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_USERS_COLLECTION_ID}/items`,
       recipes: [] as Array<Record<string, any>>,
       tabs: ["my-recipes", "all-recipes"] as Array<string>,
       currentTab: "my-recipes" as string,
@@ -119,7 +120,7 @@ export default defineComponent({
         this.newRecipe["author"] = this.user.webflow_author_id;
         this.newRecipe["_archived"] = false;
         this.newRecipe["_draft"] = false;
-        await client.post(this.collectionUrl, {
+        await client.post(this.recipesUrl, {
           fields: this.newRecipe
         });
         this.newRecipe = {
@@ -142,8 +143,13 @@ export default defineComponent({
     },
     async getRecipes() {
       try {
-        const res: { data: WebflowCollectionResponseInterface } = await client.get(this.collectionUrl);
-        this.recipes = res.data.items;
+        const recipes: { data: WebflowCollectionResponseInterface } = await client.get(this.recipesUrl);
+        const authors: { data: WebflowCollectionResponseInterface } = await client.get(this.authorsUrl);
+        this.recipes = recipes.data.items.map((obj) => {
+          const author = authors.data.items.find(author => author._id === obj.author) as Record<string, any>;
+          obj["author_name"] = author.name;
+          return obj
+        });
       } catch (e) {
         console.error(e)
       }
