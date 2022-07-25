@@ -1,8 +1,8 @@
-export interface WebflowBeansCollectionResponseInterface {
+export interface WebflowCollectionResponseInterface {
     count: 1
     items: Array<Record<string, any>>
-    author: "62d84d16dccda864d91a7b8b"
-    name: "New Beans"
+    author: string
+    name: string
     "created-by": string
     "created-on": string
     "published-by": string | null

@@ -12,24 +12,24 @@
       </div>
       <button-primary text="New Product" @click="newProduct"></button-primary>
     </div>
-    <div class="my-products" v-if="currentTab === 'my-beans'">
-      <div class="product" v-for="bean in myBeans" :key="bean._id">
-        <div class="product-image" :style="{'background-image': `url(${bean.picture.url})`}"
-             v-if="bean.hasOwnProperty('picture')">
+    <div class="my-products" v-if="currentTab === 'my-recipes'">
+      <div class="product" v-for="recipe in myRecipes" :key="recipe._id">
+        <div class="product-image" :style="{'background-image': `url(${recipe.picture.url})`}"
+             v-if="recipe.hasOwnProperty('picture')">
         </div>
         <div class="product-info">
-          <h2>{{ bean.name }}</h2>
+          <h2>{{ recipe.name }}</h2>
           <span>{{ user.name }}</span>
         </div>
       </div>
     </div>
-    <div class="my-products" v-if="currentTab === 'all-beans'">
-      <div class="product" v-for="bean in beans" :key="bean._id">
-        <div class="product-image" :style="{'background-image': `url(${bean.picture.url})`}"
-             v-if="bean.hasOwnProperty('picture')">
+    <div class="my-products" v-if="currentTab === 'all-recipes'">
+      <div class="product" v-for="recipe in recipes" :key="recipe._id">
+        <div class="product-image" :style="{'background-image': `url(${recipe.picture.url})`}"
+             v-if="recipe.hasOwnProperty('picture')">
         </div>
         <div class="product-info">
-          <h2>{{ bean.name }}</h2>
+          <h2>{{ recipe.name }}</h2>
           <span>{{ user.name }}</span>
         </div>
       </div>
@@ -40,13 +40,13 @@
       </button>
       <div class="form">
         <h1>New Product</h1>
-        <input-field name="name" placeholder="Beans name" type="text" v-model="newBean.name"></input-field>
+        <input-field name="name" placeholder="Recipes name" type="text" v-model="newRecipe.name"></input-field>
         <span class="error" v-if="errors.length > 0">{{ errors[0].detail }}</span>
         <label for="file" class="file-upload">
           Upload image
         </label>
         <input type="file" id="file" ref="file" v-on:change="handleFileUpload" style="display: none"/>
-        <button-primary text="Create Bean" @click="createBean"></button-primary>
+        <button-primary text="Create Recipe" @click="createRecipe"></button-primary>
       </div>
     </div>
   </div>
@@ -56,7 +56,7 @@
 import {defineComponent} from 'vue';
 import ButtonPrimary from "@/components/Button.vue";
 import {client} from "@/server";
-import {WebflowBeansCollectionResponseInterface} from "@/interfaces/webflowCollection.interface";
+import {WebflowCollectionResponseInterface} from "@/interfaces/webflowCollection.interface";
 import InputField from "@/components/InputField.vue";
 
 export default defineComponent({
@@ -64,12 +64,12 @@ export default defineComponent({
   components: {ButtonPrimary, InputField},
   data() {
     return {
-      collectionUrl: `/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_BEANS_COLLECTION_ID}/items`,
-      beans: [] as Array<Record<string, any>>,
-      tabs: ["my-beans", "all-beans"] as Array<string>,
-      currentTab: "my-beans" as string,
+      collectionUrl: `/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_RECIPES_COLLECTION_ID}/items`,
+      recipes: [] as Array<Record<string, any>>,
+      tabs: ["my-recipes", "all-recipes"] as Array<string>,
+      currentTab: "my-recipes" as string,
       newProductMenu: false as boolean,
-      newBean: {
+      newRecipe: {
         name: "",
         picture: "",
       } as Record<string, any>,
@@ -80,35 +80,35 @@ export default defineComponent({
     user() {
       return this.$store.getters["user"];
     },
-    myBeans() {
-      const beans = JSON.parse(JSON.stringify(this.beans));
-      return beans.filter(bean => bean.author === this.user.webflow_author_id);
+    myRecipes() {
+      const recipes = JSON.parse(JSON.stringify(this.recipes));
+      return recipes.filter(recipe => recipe.author === this.user.webflow_author_id);
     },
   },
   mounted() {
-    this.getBeans();
+    this.getRecipes();
   },
   methods: {
     newProduct() {
       this.newProductMenu = true;
     },
     logout() {
-      this.$store.dispatch("logout");
+      this.$store.commit('logout', {});
       this.$router.push("/login");
     },
-    async createBean() {
+    async createRecipe() {
       try {
-        const bean = await client.post("/rest/collections/beans", this.newBean);
-        this.newBean.picture = bean.data.data.picture;
-        this.newBean["author"] = this.user.webflow_author_id;
-        this.newBean["_archived"] = false;
-        this.newBean["_draft"] = false;
+        const recipe = await client.post("/rest/collections/recipes", this.newRecipe);
+        this.newRecipe.image = recipe.data.data.image;
+        this.newRecipe["author"] = this.user.webflow_author_id;
+        this.newRecipe["_archived"] = false;
+        this.newRecipe["_draft"] = false;
         await client.post(this.collectionUrl, {
-          fields: this.newBean
+          fields: this.newRecipe
         });
-        this.newBean = {
+        this.newRecipe = {
           name: "",
-          picture: "",
+          image: "",
         } as Record<string, any>;
       } catch (e) {
         console.error(e)
@@ -117,10 +117,10 @@ export default defineComponent({
     setActiveTab(tab: string) {
       this.currentTab = tab;
     },
-    async getBeans() {
+    async getRecipes() {
       try {
-        const res: { data: WebflowBeansCollectionResponseInterface } = await client.get(this.collectionUrl);
-        this.beans = res.data.items;
+        const res: { data: WebflowCollectionResponseInterface } = await client.get(this.collectionUrl);
+        this.recipes = res.data.items;
       } catch (e) {
         console.error(e)
       }
@@ -133,7 +133,7 @@ export default defineComponent({
       reader.onload = (e) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        this.newBean.picture = e.target.result;
+        this.newRecipe.image = e.target.result;
       };
       reader.readAsDataURL(file);
     },

@@ -1,5 +1,6 @@
 <template>
   <div id="login">
+    <loading-spinner :text="preloader.text" :show="preloader.show"></loading-spinner>
     <div class="left-side">
     </div>
     <div class="right-side">
@@ -22,28 +23,44 @@ import InputField from "@/components/InputField.vue";
 import ButtonPrimary from "@/components/Button.vue";
 import { client } from "@/server";
 import { checkForErrors } from "@/utils";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 export default defineComponent({
   name: 'SignUpView',
-  components: {ButtonPrimary, InputField},
+  components: {ButtonPrimary, InputField, LoadingSpinner},
   data() {
     return {
+      preloader: {
+        text: "",
+        show: false
+      },
       fullName: "",
       email: "",
       password: "",
       errors: [],
     };
   },
+  mounted() {
+    setTimeout(() => {
+      this.preloader.show = false;
+    }, 5000);
+  },
   methods: {
+    resetLoader() {
+      this.preloader.show = false;
+      this.preloader.text = "";
+    },
     async signUp() {
       try {
+        this.preloader.show = true;
+        this.preloader.text = "Creating account...";
         // Create account with email and password
         const userData = await client.post('/auth/accounts/signup', {
           email: this.email,
           password: this.password
         });
         // Update user object in the database
-        const webflowAuthor = await client.post(`/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_AUTHORS_COLLECTION_ID}/items`, {
+        const webflowAuthor = await client.post(`/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_USERS_COLLECTION_ID}/items`, {
           fields: {
             name: this.fullName,
             _archived: false,
@@ -68,8 +85,10 @@ export default defineComponent({
           token:  userData.data.data.idToken,
           refreshToken:  userData.data.data.refreshToken,
         });
+        this.resetLoader();
         this.$router.push("/dashboard");
       } catch (e: any) {
+        this.resetLoader();
         console.error(e)
         if (checkForErrors(e.response)) {
           this.errors = e.response.data.errors;

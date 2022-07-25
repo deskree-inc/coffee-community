@@ -21,5 +21,5 @@ export default createStore({
       state.user = {};
       localStorage.removeItem("user");
     }
-  }
+  },
 });
