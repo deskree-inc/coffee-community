@@ -1,5 +1,6 @@
 <template>
   <div id="login">
+    <loading-spinner :text="preloader.text" :show="preloader.show"></loading-spinner>
     <div class="left-side">
     </div>
     <div class="right-side">
@@ -21,20 +22,31 @@ import InputField from "@/components/InputField.vue";
 import ButtonPrimary from "@/components/Button.vue";
 import {client} from "@/server";
 import {checkForErrors} from "@/utils";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 export default defineComponent({
   name: 'LoginView',
+  components: {ButtonPrimary, InputField, LoadingSpinner},
   data() {
     return {
+      preloader: {
+        text: "",
+        show: false
+      },
       email: "",
       password: "",
       errors: [],
     };
   },
-  components: {ButtonPrimary, InputField},
   methods: {
+    resetLoader() {
+      this.preloader.show = false;
+      this.preloader.text = "";
+    },
     async login() {
       try {
+        this.preloader.show = true;
+        this.preloader.text = "Logging in...";
         const userData = await client.post('/auth/accounts/sign-in/email', {
           email: this.email,
           password: this.password
@@ -49,8 +61,10 @@ export default defineComponent({
           token:  userData.data.data.idToken,
           refreshToken:  userData.data.data.refreshToken,
         });
+        this.resetLoader();
         this.$router.push("/dashboard");
       } catch (e: any) {
+        this.resetLoader();
         console.error(e)
         if (checkForErrors(e.response)) {
           this.errors = e.response.data.errors;

@@ -1,5 +1,5 @@
 <template>
-  <div id="login">
+  <div id="signup">
     <loading-spinner :text="preloader.text" :show="preloader.show"></loading-spinner>
     <div class="left-side">
     </div>
@@ -101,7 +101,7 @@ export default defineComponent({
 
 
 <style lang="scss" scoped>
-#login {
+#signup {
   width: 100%;
   height: 100vh;
   display: flex;

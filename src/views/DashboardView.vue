@@ -1,5 +1,6 @@
 <template>
   <div class="dashboard-wrapper">
+    <loading-spinner :text="preloader.text" :show="preloader.show"></loading-spinner>
     <button class="logout-button" @click="logout">
       <img src="@/assets/logout.svg" alt="logout">
     </button>
@@ -14,8 +15,8 @@
     </div>
     <div class="my-products" v-if="currentTab === 'my-recipes'">
       <div class="product" v-for="recipe in myRecipes" :key="recipe._id">
-        <div class="product-image" :style="{'background-image': `url(${recipe.picture.url})`}"
-             v-if="recipe.hasOwnProperty('picture')">
+        <div class="product-image" :style="{'background-image': `url(${recipe.image.url})`}"
+             v-if="recipe.hasOwnProperty('image')">
         </div>
         <div class="product-info">
           <h2>{{ recipe.name }}</h2>
@@ -25,8 +26,8 @@
     </div>
     <div class="my-products" v-if="currentTab === 'all-recipes'">
       <div class="product" v-for="recipe in recipes" :key="recipe._id">
-        <div class="product-image" :style="{'background-image': `url(${recipe.picture.url})`}"
-             v-if="recipe.hasOwnProperty('picture')">
+        <div class="product-image" :style="{'background-image': `url(${recipe.image.url})`}"
+             v-if="recipe.hasOwnProperty('image')">
         </div>
         <div class="product-info">
           <h2>{{ recipe.name }}</h2>
@@ -41,10 +42,12 @@
       <div class="form">
         <h1>New Product</h1>
         <input-field name="name" placeholder="Recipes name" type="text" v-model="newRecipe.name"></input-field>
+        <input-field name="description" placeholder="Description" type="text" v-model="newRecipe.description"></input-field>
         <span class="error" v-if="errors.length > 0">{{ errors[0].detail }}</span>
         <label for="file" class="file-upload">
           Upload image
         </label>
+        <span class="file-name" v-if="fileName.length > 0">{{ fileName }}</span>
         <input type="file" id="file" ref="file" v-on:change="handleFileUpload" style="display: none"/>
         <button-primary text="Create Recipe" @click="createRecipe"></button-primary>
       </div>
@@ -58,12 +61,17 @@ import ButtonPrimary from "@/components/Button.vue";
 import {client} from "@/server";
 import {WebflowCollectionResponseInterface} from "@/interfaces/webflowCollection.interface";
 import InputField from "@/components/InputField.vue";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
 
 export default defineComponent({
   name: 'DashboardView',
-  components: {ButtonPrimary, InputField},
+  components: {ButtonPrimary, InputField, LoadingSpinner},
   data() {
     return {
+      preloader: {
+        text: "",
+        show: false
+      },
       collectionUrl: `/integrations/webflow/collections/${process.env.VUE_APP_WEBFLOW_RECIPES_COLLECTION_ID}/items`,
       recipes: [] as Array<Record<string, any>>,
       tabs: ["my-recipes", "all-recipes"] as Array<string>,
@@ -71,9 +79,11 @@ export default defineComponent({
       newProductMenu: false as boolean,
       newRecipe: {
         name: "",
-        picture: "",
+        image: "",
+        description: "",
       } as Record<string, any>,
-      errors: []
+      errors: [],
+      fileName: "",
     };
   },
   computed: {
@@ -89,6 +99,10 @@ export default defineComponent({
     this.getRecipes();
   },
   methods: {
+    resetLoader() {
+      this.preloader.show = false;
+      this.preloader.text = "";
+    },
     newProduct() {
       this.newProductMenu = true;
     },
@@ -98,6 +112,8 @@ export default defineComponent({
     },
     async createRecipe() {
       try {
+        this.preloader.show = true;
+        this.preloader.text = "Creating recipe...";
         const recipe = await client.post("/rest/collections/recipes", this.newRecipe);
         this.newRecipe.image = recipe.data.data.image;
         this.newRecipe["author"] = this.user.webflow_author_id;
@@ -109,9 +125,16 @@ export default defineComponent({
         this.newRecipe = {
           name: "",
           image: "",
+          description: "",
         } as Record<string, any>;
+        this.newProductMenu = false;
+        await this.getRecipes();
+        this.resetLoader();
+        this.fileName = "";
       } catch (e) {
+        this.fileName = "";
         console.error(e)
+        this.resetLoader();
       }
     },
     setActiveTab(tab: string) {
@@ -129,6 +152,7 @@ export default defineComponent({
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const file = this.$refs.file.files[0];
+      this.fileName = file.name;
       const reader = new FileReader();
       reader.onload = (e) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -349,7 +373,18 @@ export default defineComponent({
   &:focus {
     border-color: #a25f4b;
   }
-
 }
 
+.file-name {
+  color: #a25f4b;
+  margin: 20px;
+  font-size: 12px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Beginning of string */
+  direction: rtl;
+  text-align: left;
+}
 </style>
