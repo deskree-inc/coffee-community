@@ -14,10 +14,10 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          VUE_APP_API_BASE_URL: "https://coffee-community.api.deskree.com/api/v1"
-          VUE_APP_WEBFLOW_SITE_ID: "62d815e4cede9848f8b27b3b"
-          VUE_APP_WEBFLOW_USERS_COLLECTION_ID: "62deb23eb02da508aadf9ffb"
-          VUE_APP_WEBFLOW_RECIPES_COLLECTION_ID: "62dea942505ca144ab65c4a2"
+          envkey_VUE_APP_API_BASE_URL: "https://coffee-community.api.deskree.com/api/v1"
+          envkey_VUE_APP_WEBFLOW_SITE_ID: "62d815e4cede9848f8b27b3b"
+          envkey_VUE_APP_WEBFLOW_USERS_COLLECTION_ID: "62deb23eb02da508aadf9ffb"
+          envkey_VUE_APP_WEBFLOW_RECIPES_COLLECTION_ID: "62dea942505ca144ab65c4a2"
           file_name: .env
           fail_on_empty: false
       - run: npm install && npm run build
